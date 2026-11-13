@@ -1,0 +1,92 @@
+name: Windows app
+
+# Builds the Windows app and the Microsoft Store package.
+# - Push a tag like v1.2.3 to make a release (the .msix you upload to Partner Center).
+# - Or run it by hand from the Actions tab to get a test build.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: Work out the version
+        id: ver
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") { $v = "${{ github.ref_name }}".TrimStart("v") }
+          else { $v = "0.1.${{ github.run_number }}" }
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Version tags must look like v1.2.3 (got '${{ github.ref_name }}')." }
+          "app=$v" >> $env:GITHUB_OUTPUT
+          "msix=$v.0" >> $env:GITHUB_OUTPUT
+          Write-Host "Building version $v"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the app
+        run: |
+          '{ "version": "${{ steps.ver.outputs.app }}" }' | Set-Content version.conf.json
+          npx tauri build --no-bundle --config version.conf.json
+
+      - uses: microsoft/setup-WinAppCli@v0.3
+
+      - name: Package for the Microsoft Store
+        env:
+          IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME }}
+          PUBLISHER_CN: ${{ vars.STORE_PUBLISHER }}
+          PUBLISHER_DISPLAY_NAME: ${{ vars.STORE_PUBLISHER_DISPLAY_NAME }}
+        run: |
+          if (-not ($env:IDENTITY_NAME -and $env:PUBLISHER_CN -and $env:PUBLISHER_DISPLAY_NAME)) {
+            Write-Host "::warning::Store identity variables are not set yet, so this package uses test values and can't be uploaded to the Store. Add STORE_IDENTITY_NAME, STORE_PUBLISHER and STORE_PUBLISHER_DISPLAY_NAME under Settings > Secrets and variables > Actions > Variables."
+            $env:IDENTITY_NAME = "Ambrish.CaseBoard.Test"
+            $env:PUBLISHER_CN = "CN=CaseBoardTest"
+            $env:PUBLISHER_DISPLAY_NAME = "Ambrish"
+          }
+          New-Item -ItemType Directory -Force pkg | Out-Null
+          Copy-Item src-tauri/target/release/caseboard.exe pkg/
+          $m = Get-Content msix/Package.appxmanifest -Raw
+          $m = $m.Replace("__IDENTITY_NAME__", $env:IDENTITY_NAME).Replace("__PUBLISHER_CN__", $env:PUBLISHER_CN).Replace("__PUBLISHER_DISPLAY_NAME__", $env:PUBLISHER_DISPLAY_NAME).Replace("__VERSION__", "${{ steps.ver.outputs.msix }}")
+          Set-Content pkg/Package.appxmanifest $m -Encoding utf8
+          winapp manifest update-assets app-icon.png --manifest pkg/Package.appxmanifest
+          winapp pack pkg --manifest pkg/Package.appxmanifest --no-sign --output "CaseBoard_${{ steps.ver.outputs.msix }}_x64.msix"
+          Copy-Item src-tauri/target/release/caseboard.exe "CaseBoard_${{ steps.ver.outputs.app }}_test.exe"
+          Get-ChildItem *.msix, *_test.exe | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CaseBoard-${{ steps.ver.outputs.app }}
+          path: |
+            desktop/*.msix
+            desktop/*_test.exe
+          if-no-files-found: error
+
+      - name: Attach to a GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/*.msix
+            desktop/*_test.exe

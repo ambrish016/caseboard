@@ -1,0 +1,15 @@
+{
+  "name": "caseboard-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "app": "tauri dev",
+    "app:local": "cross-env CASEBOARD_URL=http://localhost:3000 tauri dev",
+    "build": "tauri build --no-bundle"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4",
+    "cross-env": "7.0.3"
+  }
+}
