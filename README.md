@@ -3,7 +3,7 @@
 A planning board for video editors: footage, references, assets, beats and exports pinned on one desk.
 
 - **Website:** a Next.js app. The board lives in `public/board.html` and is served at `/`.
-- **Windows app:** `desktop/` is a small Tauri app that opens the live website in its own window. Every deploy to the site reaches the app the next time it opens. The board also shows **New version ready** while it's open.
+- **Windows app:** `desktop/` is a small Tauri app that opens the live website in its own window. Every deploy to the site (https://caseboard-hazel.vercel.app) reaches the app the next time it opens. The board also shows **New version ready** while it's open.
 
 ## Run the website
 
