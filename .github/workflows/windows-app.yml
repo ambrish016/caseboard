@@ -2,10 +2,13 @@ name: Windows app
 
 # Builds the Windows app and the Microsoft Store package.
 # - Push a tag like v1.2.3 to make a release (the .msix you upload to Partner Center).
-# - Or run it by hand from the Actions tab to get a test build.
+# - Any change to desktop/ on main makes a test build, so you can try it before tagging.
+# - Or run it by hand from the Actions tab.
 on:
   push:
     tags: ["v*"]
+    branches: [main]
+    paths: ["desktop/**", ".github/workflows/windows-app.yml"]
   workflow_dispatch:
 
 permissions:
