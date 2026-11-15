@@ -568,6 +568,9 @@ body.ro #pjBtn .chev{display:none}
 @media (max-width:980px){#pjName,#pjBtn .chev{display:none}#pjBtn{padding:0 6px}}
 @media (max-width:700px){#projects{left:14px}}
 @media (prefers-reduced-motion:reduce){#projects,.pjrow,.wcard{transition:none!important}}
+
+/* everything is drawn at 80%: the size Ambrish liked at 80% browser zoom, as the default */
+html{zoom:.8}
 </style>
 </head>
 <body>
@@ -969,7 +972,15 @@ function fit(){
   tx=side+(w-side-bw*z)/2-(b[0]-30)*z; ty=96-(b[1])*z+Math.max(0,(h-170-bh*z)/2); applyView();
 }
 function zoomAt(f,cx,cy){var nz=Math.max(.2,Math.min(2.5,z*f));tx=cx-(cx-tx)*(nz/z);ty=cy-(cy-ty)*(nz/z);z=nz;applyView()}
-function toWorld(e){var r=vp.getBoundingClientRect();return {x:(e.clientX-r.left-tx)/z,y:(e.clientY-r.top-ty)/z}}
+/* The whole interface is drawn at 80% (html zoom). Pointer positions and element boxes come from the
+   browser in screen pixels; F converts them to the page's own pixels. F is measured, so it is also right
+   in a browser that ignores zoom (F = 1). */
+var F=1;
+function measureF(){var w=vp.clientWidth;F=w?vp.getBoundingClientRect().width/w:1;if(!(F>0.2&&F<5))F=1}
+function ex(e){return e.clientX/F}
+function ey(e){return e.clientY/F}
+function br(el){var r=el.getBoundingClientRect();return {left:r.left/F,top:r.top/F,width:r.width/F,height:r.height/F,right:r.right/F,bottom:r.bottom/F}}
+function toWorld(e){var r=br(vp);return {x:(ex(e)-r.left-tx)/z,y:(ey(e)-r.top-ty)/z}}
 function center(){return {x:(vp.clientWidth/2-tx)/z,y:(vp.clientHeight/2-ty)/z}}
 function jump(id){var c=card(id);if(!c)return;var o=host(c);if(z<.75)z=.9;tx=vp.clientWidth/2-(o.x+cw(o)/2)*z;ty=vp.clientHeight/2-(o.y+40)*z;applyView();select(o.id)}
 
@@ -1275,7 +1286,7 @@ vp.addEventListener("pointerdown",function(e){
   if(t.id==="proj"){if(ro())e.preventDefault();return}
   var cap=function(){try{vp.setPointerCapture(e.pointerId)}catch(err){}};
   var pan=function(){e.preventDefault();blurNow();if(tying){tying=null;if(tool==="string")setTool("select");drawStrings()}select(null);
-    ptr={mode:"pan",sx:e.clientX,sy:e.clientY,ox:tx,oy:ty,moved:false};cap()};
+    ptr={mode:"pan",sx:ex(e),sy:ey(e),ox:tx,oy:ty,moved:false};cap()};
   if(e.button===1||tool==="hand"||ro()&&!t.closest("[data-out]")){pan();return}
   if(tool.indexOf("sec-")===0){e.preventDefault();blurNow();moveGhost(w);placeGhost();return}
   if(tool==="eraser"){e.preventDefault();blurNow();ptr={mode:"erase"};eraseAt(e);cap();return}
@@ -1293,7 +1304,7 @@ vp.addEventListener("pointerdown",function(e){
     e.preventDefault(); if(ro())return;
     var c=card(mini.dataset.out), from=c.in; delete c.in;
     c.x=Math.round(w.x-cw(c)/2); c.y=Math.round(w.y-24); sel=c.id; render();
-    ptr={mode:"move",o:c,k:"card",el:world.querySelector('[data-id="'+c.id+'"]'),f:null,sx:e.clientX,sy:e.clientY,g:snap(c),moved:false,from:from};
+    ptr={mode:"move",o:c,k:"card",el:world.querySelector('[data-id="'+c.id+'"]'),f:null,sx:ex(e),sy:ey(e),g:snap(c),moved:false,from:from};
     cap(); return;
   }
   var el=t.closest("[data-id]"), o=el&&obj(el.dataset.id), k=kindOf(o);
@@ -1309,9 +1320,9 @@ vp.addEventListener("pointerdown",function(e){
   var f=t.closest(".f");
   if(f&&document.activeElement===f)return;      /* already editing this text: let the browser place the caret */
   e.preventDefault(); blurNow(); select(o.id);
-  if(k==="sec"&&t.closest(".rs")){ptr={mode:"resize",o:o,el:el,sx:e.clientX,sy:e.clientY,w:o.w,h:o.h,moved:false};cap();return}
-  if(t.closest(".cres")){ptr={mode:"cres",o:o,el:el,sx:e.clientX,w:cw(o),moved:false};cap();return}
-  ptr={mode:"move",o:o,k:k,el:el,f:f,sx:e.clientX,sy:e.clientY,g:snap(o),moved:false,vid:!!t.closest(".vwrap")&&!!VC[o.id],lplay:!!t.closest(".lframe[data-play]")};
+  if(k==="sec"&&t.closest(".rs")){ptr={mode:"resize",o:o,el:el,sx:ex(e),sy:ey(e),w:o.w,h:o.h,moved:false};cap();return}
+  if(t.closest(".cres")){ptr={mode:"cres",o:o,el:el,sx:ex(e),w:cw(o),moved:false};cap();return}
+  ptr={mode:"move",o:o,k:k,el:el,f:f,sx:ex(e),sy:ey(e),g:snap(o),moved:false,vid:!!t.closest(".vwrap")&&!!VC[o.id],lplay:!!t.closest(".lframe[data-play]")};
   if(k==="sec")ptr.group=P.cards.filter(function(c){return !c.in&&secOf(c)===o.id}).map(function(c){return {c:c,g:snap(c),el:world.querySelector('[data-id="'+c.id+'"]')}});
   cap();
 });
@@ -1336,7 +1347,7 @@ vp.addEventListener("pointermove",function(e){
     else{o.x2=Math.round(w.x);o.y2=Math.round(w.y)}
     drawShapes(); return;
   }
-  var dx=e.clientX-ptr.sx, dy=e.clientY-ptr.sy;
+  var dx=ex(e)-ptr.sx, dy=ey(e)-ptr.sy;
   if(!ptr.moved&&Math.hypot(dx,dy)<5)return;
   ptr.moved=true;
   if(ptr.mode==="pan"){vp.classList.add("panning");tx=ptr.ox+dx;ty=ptr.oy+dy;applyView();return}
@@ -1376,9 +1387,9 @@ vp.addEventListener("pointerup",up);
 vp.addEventListener("pointerleave",function(){if(G){$("gwrap").classList.remove("show");G.on=false}});
 vp.addEventListener("pointercancel",function(e){if(ptr){ptr.f=null;ptr.from=null;up(e)}});
 vp.addEventListener("wheel",function(e){
-  e.preventDefault(); closeCtx(); var r=vp.getBoundingClientRect();
-  if(e.ctrlKey||e.metaKey)zoomAt(Math.exp(-e.deltaY*0.0022),e.clientX-r.left,e.clientY-r.top);
-  else{tx-=e.deltaX;ty-=e.deltaY;applyView()}
+  e.preventDefault(); closeCtx(); var r=br(vp);
+  if(e.ctrlKey||e.metaKey)zoomAt(Math.exp(-e.deltaY*0.0022),ex(e)-r.left,ey(e)-r.top);
+  else{tx-=e.deltaX/F;ty-=e.deltaY/F;applyView()}
 },{passive:false});
 
 /* ---------- right-click menu ---------- */
@@ -1401,7 +1412,7 @@ function openCtx(e,o){
   h+=it.map(function(x,i){return x?'<button class="mi'+(x[2]?' del':'')+'" type="button" role="menuitem" data-i="'+i+'">'+x[0]+'</button>':'<div class="csep"></div>'}).join("");
   m.innerHTML=h; m.classList.add("show");
   var mw=m.offsetWidth, mh=m.offsetHeight;
-  m.style.left=Math.min(e.clientX,window.innerWidth-mw-10)+"px"; m.style.top=Math.min(e.clientY,window.innerHeight-mh-10)+"px";
+  m.style.left=Math.min(ex(e),window.innerWidth/F-mw-10)+"px"; m.style.top=Math.min(ey(e),window.innerHeight/F-mh-10)+"px";
   m.onclick=function(ev){
     var b=ev.target.closest("[data-i]"); if(!b)return; var i=b.dataset.i; closeCtx();
     if(i.indexOf("col")===0){var n=+i.slice(3); if(k==="folder")o.color=n; else o.color=INK[n]; render()}
@@ -1650,12 +1661,12 @@ function dockPath(W,lx,amp){
 }
 function drawDock(){
   if(window.innerWidth<=700)return; if(!dockBase)measureDock();
-  var r=bar.getBoundingClientRect(), left=r.left+r.width/2-dockBase.w/2;
+  var r=br(bar), left=r.left+r.width/2-dockBase.w/2;
   dockTools.forEach(function(t,i){
     var s=1+0.26*bump(dk.mx-(left+dockBase.c[i]))*dk.amp;
     if(s>1.002)t.style.setProperty("--s",s.toFixed(3)); else t.style.removeProperty("--s");
   });
-  r=bar.getBoundingClientRect();
+  r=br(bar);
   var d=dockPath(r.width,dk.mx-r.left,dk.amp);
   dockBg.style.clipPath='path("'+d+'")'; dockBg.style.webkitClipPath='path("'+d+'")';
   dockLn.setAttribute("d",d); dockSh.setAttribute("d",d);
@@ -1665,7 +1676,7 @@ function dockTick(){
   if(Math.abs(dk.target-dk.amp)<0.01)dk.amp=dk.target; else dk.raf=requestAnimationFrame(dockTick);
   drawDock();
 }
-bar.addEventListener("mousemove",function(e){dk.mx=e.clientX;dk.target=1;if(dk.amp<1){if(!dk.raf)dk.raf=requestAnimationFrame(dockTick)}else drawDock()});
+bar.addEventListener("mousemove",function(e){dk.mx=ex(e);dk.target=1;if(dk.amp<1){if(!dk.raf)dk.raf=requestAnimationFrame(dockTick)}else drawDock()});
 bar.addEventListener("mouseleave",function(){dk.target=0;if(!dk.raf)dk.raf=requestAnimationFrame(dockTick)});
 window.addEventListener("resize",function(){dockBase=null;dk.amp=0;dk.target=0;drawDock()});
 
@@ -1752,9 +1763,9 @@ $("roBtn").addEventListener("click",function(){
   tying=null;sel=null;setTool("select");$("lib").classList.remove("show");render();
   if(on)toast("This is what a client would see. Nothing can be changed.");
 });
-window.addEventListener("resize",applyView);
+window.addEventListener("resize",function(){measureF();applyView()});
 
-load(); R.projects.forEach(function(pr){pr.pages.forEach(function(pg){pg.cards.forEach(function(c){if(c.playing)c.playing=false})})}); hist.cur=JSON.stringify(R); render(); fit(); drawDock();
+measureF(); load(); R.projects.forEach(function(pr){pr.pages.forEach(function(pg){pg.cards.forEach(function(c){if(c.playing)c.playing=false})})}); hist.cur=JSON.stringify(R); render(); fit(); drawDock();
 setTimeout(function(){$("hint").style.display="none"},7000);
 })();
 </script>
