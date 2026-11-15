@@ -966,14 +966,16 @@ function openProject(id){
   var p=null; R.projects.forEach(function(x){if(x.id===id)p=x}); if(!p)p=R.projects[0];
   R.cur=p.id; S=p; S.cur=Math.min(S.cur||0,S.pages.length-1); P=S.pages[S.cur];
 }
+/* the old version shipped these sample assets; drop them and keep only what the user saved */
+function dropSamples(lib){return (lib||[]).filter(function(a){return !LIB0.some(function(s){return s.name===a.name&&s.kind===a.kind&&s.loc===a.loc})})}
 function load(){
   try{
     var d=JSON.parse(localStorage.getItem(KEY)||"null");
-    if(d&&d.projects&&d.projects.length){R=d;R.library=R.library||[];R.projects.forEach(function(p){fixIds(p.pages)});openProject(R.cur);return}
+    if(d&&d.projects&&d.projects.length){R=d;R.library=dropSamples(R.library);R.projects.forEach(function(p){fixIds(p.pages)});openProject(R.cur);return}
     /* someone who used the board before projects existed keeps their work as their first project */
     var o=JSON.parse(localStorage.getItem(OLDKEY)||"null");
     if(o&&o.pages&&o.pages.length){var p=newProject("My first project");p.pages=o.pages;p.cur=Math.min(o.cur||0,o.pages.length-1);fixIds(p.pages);
-      R={projects:[p],cur:p.id,library:o.library||[]};openProject(p.id);return}
+      R={projects:[p],cur:p.id,library:dropSamples(o.library)};openProject(p.id);return}
   }catch(e){}
   /* a brand-new user starts with one clean project and an empty page */
   var np=newProject("My first project"); R={projects:[np],cur:np.id,library:[]}; openProject(np.id);
