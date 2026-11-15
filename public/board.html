@@ -571,6 +571,49 @@ body.ro #pjBtn .chev{display:none}
 
 /* everything is drawn at 80%: the size Ambrish liked at 80% browser zoom, as the default */
 html{zoom:.8}
+
+/* Quick Look style preview */
+#ql{position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .25s}
+#ql.show{opacity:1;visibility:visible;transition:opacity .2s,visibility 0s}
+.qlcard{width:min(980px,calc(100% - 60px));max-height:calc(100% - 60px);display:flex;flex-direction:column;background:var(--glass-strong);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden;
+  transform:scale(.9);transition:transform .45s cubic-bezier(.3,1.35,.5,1)}
+#ql.show .qlcard{transform:none}
+.qlhead{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-bottom:1px solid var(--line)}
+.qlic{flex:none;min-width:34px;height:34px;padding:0 6px;border-radius:9px;background:linear-gradient(180deg,#4ab3f8,#0a64ff);color:#fff;font:700 10.5px var(--body);letter-spacing:.04em;display:grid;place-items:center}
+.qlt{flex:1;min-width:0}
+.qlt b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qlt small{font-size:12px;color:var(--muted)}
+.qlb{flex:none;text-decoration:none;color:var(--text);background:var(--hover);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600}
+.qlb:hover{background:var(--accent);color:#fff}
+.qlb[hidden]{display:none}
+.qlx{flex:none;width:32px;height:32px;border:0;border-radius:50%;background:var(--hover);font-size:20px;line-height:1;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
+.qlx:hover{transform:scale(1.1)}
+.qlbody{flex:1;min-height:0;display:grid;place-items:center;background:#000;overflow:auto}
+.qlbody video,.qlbody img{display:block;max-width:100%;max-height:calc(100vh - 170px);object-fit:contain}
+.qlbody iframe{width:100%;height:calc(100vh - 170px);border:0;background:#fff}
+.qlbody pre{margin:0;width:100%;max-height:calc(100vh - 170px);overflow:auto;padding:18px 20px;background:var(--chip);color:var(--text);font:12.5px/1.5 var(--mono);white-space:pre-wrap;box-sizing:border-box;align-self:stretch}
+.qlaudio{display:grid;justify-items:center;gap:22px;padding:48px 20px}
+.qlwave{display:flex;align-items:center;gap:6px;height:60px}
+.qlwave i{width:8px;border-radius:4px;background:linear-gradient(180deg,#4ab3f8,#0a64ff);animation:wave 1.1s ease-in-out infinite}
+.qlwave i:nth-child(1){height:24px}.qlwave i:nth-child(2){height:48px;animation-delay:.1s}.qlwave i:nth-child(3){height:60px;animation-delay:.2s}.qlwave i:nth-child(4){height:40px;animation-delay:.3s}.qlwave i:nth-child(5){height:20px;animation-delay:.4s}
+@keyframes wave{50%{transform:scaleY(.45)}}
+.qlnone{display:grid;justify-items:center;gap:14px;padding:56px 24px;text-align:center;color:#d1d1d6;max-width:420px}
+.qlnone p{margin:0;font-size:14px}
+.qlext{min-width:88px;height:104px;padding:0 10px;border-radius:14px;background:#2c2c2e;color:#fff;display:grid;place-items:center;font:700 18px var(--body);letter-spacing:.02em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+@media (prefers-reduced-motion:reduce){#ql,.qlcard,.qlwave i{transition:none!important;animation:none!important}}
+
+/* storyboard frames with images */
+.box{position:relative;overflow:hidden}
+.box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px}
+.box.has{border:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.box.has .f-detail{position:absolute;left:6px;bottom:6px;z-index:1;margin:0;background:rgba(0,0,0,.6);color:#fff;opacity:1;padding:1px 8px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.boxhint,.boxbad{position:absolute;left:8px;right:8px;bottom:6px;font-size:10.5px;line-height:1.3;color:#8e8e93;text-align:center;display:none;pointer-events:none}
+.card.sel .box:not(.has):not(.bad) .boxhint{display:block}
+.box.bad{border-color:#ff9f0a}
+.box.bad .boxbad{display:block;color:#b25000;bottom:auto;top:50%;transform:translateY(-50%)}
+.box.bad .f-detail{display:none}
+.box.edit{border-style:solid;border-color:var(--accent);padding:8px;place-items:center stretch}
+.f-imgurl{font:500 12px var(--body);color:#1d1d1f;text-align:center;word-break:break-all}
 </style>
 </head>
 <body>
@@ -663,6 +706,12 @@ html{zoom:.8}
   <div class="wrow"><button type="button" class="wbtn pri" data-w="sections">Add the four sections</button><button type="button" class="wbtn" data-w="sticky">Add a sticky note</button></div>
   <div class="wtpl"><span>Templates</span><button type="button" class="wchip" data-w="tpl" data-tpl="amv">AMV edit</button><button type="button" class="wchip" data-w="tpl" data-tpl="talk">Talking-head short</button><button type="button" class="wchip" data-w="tpl" data-tpl="promo">Motion graphics promo</button></div>
 </div></div>
+<div id="ql" role="dialog" aria-modal="true" aria-label="Preview"><div class="qlcard">
+  <div class="qlhead"><span class="qlic" id="qlIc"></span><div class="qlt"><b id="qlName"></b><small id="qlMeta"></small></div>
+  <a class="qlb" id="qlTab" target="_blank" rel="noopener">Open in new tab</a><a class="qlb" id="qlDl">Download</a>
+  <button type="button" class="qlx" id="qlClose" aria-label="Close the preview">&times;</button></div>
+  <div class="qlbody" id="qlBody"></div>
+</div></div>
 <div class="ui" id="toast" role="status"></div>
 <button class="ui" id="updPill" type="button"><i></i>New version ready <b>Refresh</b></button>
 <input type="file" id="filePick" hidden>
@@ -747,7 +796,8 @@ function linkAt(c,sec){
 var NET=null, NETW=[];
 (function(){var im=new Image();im.onload=function(){NET=true;NETW.forEach(function(f){f()});NETW=[];render()};im.onerror=function(){NET=false;NETW=[]};im.referrerPolicy="no-referrer";im.src="https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg";})();
 function thumbOf(c){
-  if(c.thumb)return c.thumb;
+  if(c.thumb&&!(/^blob:/.test(c.thumb)&&!LIVE[c.thumb]))return c.thumb;
+  if(c.thumbFile){var u=fileUrl(c.thumbFile);if(u)return u;if(!MISSING[c.thumbFile.key])loadFile(c.thumbFile).then(function(){render()})}
   if(NET&&c.plat==="yt"&&c.vid)return "https://i.ytimg.com/vi/"+encodeURIComponent(c.vid)+"/hqdefault.jpg";
   if(NET&&c.autoThumb)return c.autoThumb;
   return "";
@@ -1026,13 +1076,13 @@ function linkHTML(c){
 }
 var LIVE={}, VC={};
 function mediaHTML(c){
-  var T=TYPES.media, done=isDone(c), isV=/^video\//.test(c.mime||""), dead=/^blob:/.test(c.src||"")&&!LIVE[c.src];
-  var box='<div class="vwrap" style="aspect-ratio:'+(c.ar||(isV?16/9:4/3))+'">'+(dead?'<div class="vmiss">This file was only kept for one session.<br>Drop it on this card again.</div>':isV?'<div class="vslot" data-v="'+c.id+'"></div><span class="vbig"></span>':'<img src="'+esc(c.src)+'" alt="" draggable="false">')+'</div>';
-  var ctl=isV&&!dead?'<div class="vctl"><button type="button" data-vb="-1" title="Back one frame (Left arrow)">&#8249;</button><button type="button" class="vp" data-vp title="Play or pause (K)"><i></i></button><button type="button" data-vb="1" title="Forward one frame (Right arrow)">&#8250;</button>'+
+  var T=TYPES.media, done=isDone(c), isV=/^video\//.test(c.mime||""), src=mediaSrc(c), dead=src==="", wait=src===null;
+  var box='<div class="vwrap" style="aspect-ratio:'+(c.ar||(isV?16/9:4/3))+'">'+(wait?'<div class="vmiss">Loading…</div>':dead?'<div class="vmiss">This file isn\'t stored in this browser.<br>Drop it on this card again.</div>':isV?'<div class="vslot" data-v="'+c.id+'"></div><span class="vbig"></span>':'<img src="'+esc(src)+'" alt="" draggable="false">')+'</div>';
+  var ctl=isV&&src?'<div class="vctl"><button type="button" data-vb="-1" title="Back one frame (Left arrow)">&#8249;</button><button type="button" class="vp" data-vp title="Play or pause (K)"><i></i></button><button type="button" data-vb="1" title="Forward one frame (Right arrow)">&#8250;</button>'+
     '<span class="vtime">0:00.00</span></div>'+
     '<div class="vrow2"><input type="range" class="vscrub" min="0" max="1000" value="0" aria-label="Scrub the clip"><button type="button" class="vchip" data-vs title="Playback speed">1&times;</button><button type="button" class="vchip" data-vl title="Loop">Loop</button></div>':'';
   return '<div class="card t-media'+(sel===c.id?' sel':'')+'" data-id="'+c.id+'" style="left:'+c.x+'px;top:'+c.y+'px;width:'+cw(c)+'px">'+box+ctl+
-    fld(c,"title","Name this clip")+(c.session?'<div class="sess">Only kept until you reload</div>':'')+(isV?notesHTML(c):'')+
+    fld(c,"title","Name this clip")+(isV?notesHTML(c):'')+
     '<div class="foot"><button class="stamp'+(done?' done':c.status>0?' mid':'')+'" type="button" data-cycle>'+T.st[c.status]+'</button></div><span class="cres" title="Drag to resize"></span></div>';
 }
 function cardHTML(c){
@@ -1045,7 +1095,13 @@ function cardHTML(c){
   else if(c.type==="source"||c.type==="reference")b='<div class="shot">'+fld(c,"detail",c.type==="source"?"00:00 - 00:00 to use":"timestamp to study")+'</div>'+fld(c,"title",c.type==="source"?"Name this footage":"Name this reference")+loc+note;
   else if(c.type==="asset")b=fld(c,"title","Asset name")+fld(c,"detail","kind: SFX, music, font")+loc+note;
   else if(c.type==="beat")b=fld(c,"detail","00:00")+fld(c,"title","What happens here")+note;
-  else if(c.type==="frame")b='<div class="box">'+fld(c,"detail","Shot 1")+'</div>'+fld(c,"title","Caption")+note;
+  else if(c.type==="frame"){
+    var fi=frameImg(c);
+    b=c.imgEdit?'<div class="box edit"><div class="f f-imgurl" data-f="imgurl" data-ph="Paste an image link, then press Enter" contenteditable="true" spellcheck="false"></div></div>'
+      :'<div class="box'+(fi?' has':'')+(c.imgBad?' bad':'')+'">'+(fi?'<img src="'+esc(fi)+'" alt="" draggable="false" referrerpolicy="no-referrer" onerror="window.__frameBad&&window.__frameBad(this)">':'')+fld(c,"detail","Shot 1")+
+        '<span class="boxhint">Paste, drop or right-click to add an image</span><span class="boxbad">That link isn\'t an image. On the website, right-click the picture and choose Copy image address.</span></div>';
+    b+=fld(c,"title","Caption")+note;
+  }
   else if(c.type==="version")b='<div class="hello">EXPORT<span>THIS VERSION IS</span></div><div class="in">'+fld(c,"title","v1")+fld(c,"detail","1080 x 1920, H.264")+loc+note;
   else b=fld(c,"title","Project or template file")+fld(c,"detail","app")+loc+note;
   if(c.type==="asset"&&!linked(c.id))flag='<span class="flag">Not used yet</span>';
@@ -1072,7 +1128,7 @@ function mountFrames(){
 }
 function getVid(c){
   var v=VC[c.id]; if(v)return v;
-  v=document.createElement("video"); v.src=c.src; v.preload="metadata"; v.playsInline=true; v.setAttribute("playsinline",""); v.draggable=false;
+  v=document.createElement("video"); v.src=mediaSrc(c)||""; v.preload="metadata"; v.playsInline=true; v.setAttribute("playsinline",""); v.draggable=false;
   v.dataset.fps=c.fps||30; v.addEventListener("loadedmetadata",function(){
     if(!v.videoWidth)return; var ar=v.videoWidth/v.videoHeight; var cc=card(c.id)||c;
     if(!cc.ar||Math.abs(cc.ar-ar)>0.01){cc.ar=+ar.toFixed(4);if(!cc.sized)cc.w=autoW(ar);cc.sized=true;render()}
@@ -1095,6 +1151,40 @@ function vui(id){
 function vstep(id,dir){var v=VC[id];if(!v)return;v.pause();v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+dir/(+v.dataset.fps||30)))}
 function vtoggle(id){var v=VC[id];if(!v)return;if(v.paused){var p=v.play();if(p&&p.catch)p.catch(function(){toast("The browser blocked playback. Click play again.")})}else v.pause()}
 
+/* ---------- files kept in this browser (IndexedDB), so attached and dropped files survive a reload ---------- */
+var FILES={}, URLS={}, MISSING={}, LOADING={}, IDBP=null;
+function idb(){
+  if(!IDBP)IDBP=new Promise(function(res){try{var r=indexedDB.open("caseboard-files",1);r.onupgradeneeded=function(){r.result.createObjectStore("files")};r.onsuccess=function(){res(r.result)};r.onerror=function(){res(null)}}catch(e){res(null)}});
+  return IDBP;
+}
+function idbReq(mode,fn){return idb().then(function(db){if(!db)return null;return new Promise(function(res){try{var t=db.transaction("files",mode),r=fn(t.objectStore("files"));t.oncomplete=function(){res(r&&r.result!==undefined?r.result:true)};t.onerror=t.onabort=function(){res(null)}}catch(e){res(null)}})})}
+function storeFile(file){
+  var k="f"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  FILES[k]=file; URLS[k]=URL.createObjectURL(file);
+  idbReq("readwrite",function(s){return s.put(file,k)}).then(function(ok){if(!ok)toast("This browser couldn't keep a copy of "+file.name+", so it only opens until you reload.")});
+  return {key:k,name:file.name,type:file.type||"",size:file.size};
+}
+function fileUrl(f){return f&&URLS[f.key]||""}
+function loadFile(f){
+  if(!f)return Promise.resolve(null);
+  if(FILES[f.key])return Promise.resolve(FILES[f.key]);
+  if(!LOADING[f.key])LOADING[f.key]=idbReq("readonly",function(s){return s.get(f.key)}).then(function(b){
+    if(b&&b.size!=null){FILES[f.key]=b;URLS[f.key]=URL.createObjectURL(b)}else MISSING[f.key]=1; return FILES[f.key]||null});
+  return LOADING[f.key];
+}
+/* files no card points at any more (deleted cards from earlier visits) are cleared on load */
+function cleanFiles(){
+  var keep={}; try{var d=JSON.parse(localStorage.getItem(KEY)||"null");(d&&d.projects||[]).forEach(function(p){p.pages.forEach(function(pg){pg.cards.forEach(function(c){for(var k in c){var v=c[k];if(v&&typeof v==="object"&&typeof v.key==="string"&&/^f[0-9a-z]+$/.test(v.key))keep[v.key]=1}})})})}catch(e){return}
+  idbReq("readonly",function(s){return s.getAllKeys()}).then(function(keys){if(!keys||!keys.length)return;
+    var drop=keys.filter(function(k){return !keep[k]}); if(drop.length)idbReq("readwrite",function(s){drop.forEach(function(k){s.delete(k)});return null})});
+}
+function mediaSrc(c){
+  if(c.src&&!/^blob:/.test(c.src))return c.src;
+  if(c.file){var u=fileUrl(c.file);if(u)return u;if(MISSING[c.file.key])return "";loadFile(c.file).then(function(){render()});return null}
+  if(c.src&&LIVE[c.src])return c.src;
+  return "";
+}
+
 /* ---------- uploads: kept with the board when the viewer allows it, otherwise for this session ---------- */
 var assetsP=null;
 function assetsNS(){if(!assetsP)assetsP=(window.claude&&window.claude.use)?window.claude.use("assets").catch(function(){return null}):Promise.resolve(null);return assetsP}
@@ -1105,22 +1195,22 @@ function keepFile(file,onUrl,onSession){
 }
 function addFile(file,p){
   var isV=/^video\//.test(file.type), isI=/^image\//.test(file.type);
-  if(!isV&&!isI){var a={id:nid("c"),type:"asset",title:file.name.replace(/\.[^.]+$/,""),detail:file.type||"File",note:"",loc:fileLabel(file),status:1,x:Math.round(p.x-CW/2),y:Math.round(p.y-30)};P.cards.push(a);render();return}
-  var url=URL.createObjectURL(file); LIVE[url]=1;
-  var c={id:nid("c"),type:"media",mime:file.type,src:url,title:file.name.replace(/\.[^.]+$/,""),notes:[],status:0,w:isV?300:260,ar:null,x:0,y:0};
+  if(!isV&&!isI){var a={id:nid("c"),type:"asset",title:file.name.replace(/\.[^.]+$/,""),detail:kindOfFile(file.name,file.type),note:"",loc:fileLabel(file),file:storeFile(file),status:1,x:Math.round(p.x-CW/2),y:Math.round(p.y-30)};P.cards.push(a);sel=a.id;render();return}
+  var fk=storeFile(file), url=fileUrl(fk);
+  var c={id:nid("c"),type:"media",mime:file.type,src:"",file:fk,title:file.name.replace(/\.[^.]+$/,""),notes:[],status:0,w:isV?300:260,ar:null,x:0,y:0};
   c.x=Math.round(p.x-c.w/2); c.y=Math.round(p.y-80); P.cards.push(c); sel=c.id;
   if(isI){var im=new Image();im.onload=function(){c.ar=+(im.naturalWidth/im.naturalHeight).toFixed(4);c.w=autoW(c.ar);c.x=Math.round(p.x-c.w/2);render()};im.src=url}
   render();
-  keepFile(file,function(u){c.src=u;LIVE[u]=1;delete c.session;save()},function(why){c.session=true;render();if(why==="over 20 MB")toast(file.name+" is over 20 MB, so it stays only until you reload.")});
+  keepFile(file,function(u){c.src=u;save()},function(){});
 }
 function setThumb(c,file){
-  var url=URL.createObjectURL(file); LIVE[url]=1; c.thumb=url; render(); toast("Thumbnail added.");
+  c.thumbFile=storeFile(file); c.thumb=""; render(); toast("Thumbnail added.");
   keepFile(file,function(u){c.thumb=u;save()},function(){});
 }
 function replaceMedia(c,file){
-  var url=URL.createObjectURL(file); LIVE[url]=1; if(VC[c.id]){VC[c.id].pause();delete VC[c.id]}
-  c.src=url; c.mime=file.type; c.sized=false; render();
-  keepFile(file,function(u){c.src=u;delete c.session;save()},function(){c.session=true;render()});
+  if(VC[c.id]){VC[c.id].pause();delete VC[c.id]}
+  c.file=storeFile(file); c.src=""; c.mime=file.type; c.sized=false; delete c.session; render();
+  keepFile(file,function(u){c.src=u;save()},function(){});
 }
 function addLink(u,p){
   var r=parseLink(u); if(!r)return null;
@@ -1399,10 +1489,16 @@ function openCtx(e,o){
   var dots=function(list,cur){return '<div class="crow">'+list.map(function(c,i){return '<button type="button" class="cdot" data-i="col'+i+'" style="--c:'+(c||"var(--text)")+'" aria-label="Colour '+(i+1)+'"></button>'}).join("")+'</div><div class="csep"></div>'};
   if(!o){it=[["Add a sticky note here",function(){addCard("note",w)}],["Add text here",function(){addText(w)}],["Add a folder here",function(){addCard("folder",w)}],0,["Fit the page on screen",fit]]}
   else if(k==="card"){
-    it=[["Tie a string to another card",function(){startTie(o)}]];
+    it=[];
+    if(canOpen(o))it.push([openLabel(o),function(){openCard(o)}],0);
+    it.push(["Tie a string to another card",function(){startTie(o)}]);
     if(o.type==="link")it.push(["Add a thumbnail image",function(){sel=o.id;$("filePick").click()}]);
     else if(o.type==="media")it.push(["Replace the file",function(){sel=o.id;$("filePick").click()}]);
-    else if(!/note|beat|frame/.test(o.type))it.push(["Attach a file",function(){sel=o.id;$("filePick").click()}]);
+    else if(o.type==="frame"){
+      it.push(["Add an image from your computer",function(){sel=o.id;$("filePick").click()}],["Add an image from a link",function(){askFrameUrl(o)}]);
+      if(o.imgFile||o.imgUrl)it.push(["Remove the image",function(){delete o.imgFile;delete o.imgUrl;delete o.imgBad;render()}]);
+    }
+    else if(!/note|beat/.test(o.type))it.push(["Attach a file",function(){sel=o.id;$("filePick").click()}]);
     if(o.type==="asset")it.push(["Save to asset library",function(){R.library.push({name:o.title||"Untitled",kind:o.detail||"Asset",loc:o.loc});save();toast("Saved to your asset library.");if($("lib").classList.contains("show"))renderLib()}]);
     it.push(["Move to next status",function(){o.status=(o.status+1)%TYPES[o.type].st.length;render()}],["Duplicate",function(){duplicate(o.id)}],0,["Delete",function(){removeObj(o.id)},1]);
   }
@@ -1460,7 +1556,7 @@ world.addEventListener("input",function(e){
   var f=t.closest(".f"); if(!f)return; var o=obj(f.closest("[data-id]").dataset.id); if(!o)return;
   var val=f.innerText.replace(/\n+$/,"");
   if(f.dataset.n!=null){var n=o.notes[+f.dataset.n];if(!n)return;if(f.dataset.f==="ntime"){n.t=val;n.s=parseT(val)}else n.text=val;save("type");return}
-  if(f.dataset.f==="url")return;
+  if(f.dataset.f==="url"||f.dataset.f==="imgurl")return;
   o[f.dataset.f]=val; save("type"); chrome();
 });
 world.addEventListener("keydown",function(e){
@@ -1474,6 +1570,8 @@ world.addEventListener("focusout",function(e){
     if(o&&r){var mid=o.x+cw(o)/2;for(var k in r)o[k]=r[k];o.x=Math.round(mid-o.w/2);o.enriched=false;o.playing=false;setTimeout(function(){render();enrich(o)},0)}
     else if(t.innerText.trim())toast("That doesn't look like a link. Paste a full address starting with https://");return}
   if(t.isContentEditable&&t.dataset.f==="ntime"){setTimeout(render,0)}
+  if(t.isContentEditable&&t.dataset.f==="imgurl"){var fo=obj(t.closest("[data-id]").dataset.id),v=t.innerText.trim();
+    if(fo){if(v){if(!setFrameUrl(fo,v)){fo.imgEdit=false;setTimeout(render,0)}}else{fo.imgEdit=false;setTimeout(render,0)}}return}
   if(!t.isContentEditable||t.innerText.trim())return;
   t.innerHTML="";
   if(t.classList.contains("txt")){var id=t.dataset.id;setTimeout(function(){var o=obj(id);if(o&&!o.text)removeObj(id)},0)}
@@ -1486,10 +1584,13 @@ $("filePick").addEventListener("change",function(e){
   var f=e.target.files[0], c=card(sel); if(!f||!c)return;
   if(c.type==="link"){e.target.value="";setThumb(c,f);return}
   if(c.type==="media"){e.target.value="";replaceMedia(c,f);return}
-  c.loc=fileLabel(f); if(!c.title)c.title=f.name.replace(/\.[^.]+$/,""); if(c.status===0&&c.type!=="style")c.status=1;
+  if(c.type==="frame"){e.target.value="";setFrameFile(c,f);return}
+  c.loc=fileLabel(f); c.file=storeFile(f); if(!c.title)c.title=f.name.replace(/\.[^.]+$/,""); if(c.status===0&&c.type!=="style")c.status=1;
+  if(c.type==="asset"&&!c.detail)c.detail=kindOfFile(f.name,f.type);
   e.target.value=""; render();
 });
 document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"&&$("ql").classList.contains("show")){qlClose();e.preventDefault();return}
   if(e.key==="Escape"&&!typing()){closeCtx();if(tying){tying=null;drawStrings()}setTool("select");select(null);["menu","lib","list"].forEach(function(i){$(i).classList.remove("show")});projOpen(false);return}
   if((e.ctrlKey||e.metaKey)&&!e.altKey&&!typing()&&!ro()){
     var kk=e.key.toLowerCase();
@@ -1516,8 +1617,10 @@ document.addEventListener("paste",function(e){
   var at=lastW||center(), sc=sel&&card(sel), files=[].slice.call(cd.files||[]);
   if(files.length){e.preventDefault();
     if(sc&&sc.type==="link"&&/^image\//.test(files[0].type)){setThumb(sc,files[0]);return}
+    if(sc&&sc.type==="frame"&&/^image\//.test(files[0].type)){setFrameFile(sc,files[0]);return}
     files.slice(0,12).forEach(function(f,i){addFile(f,{x:at.x+i*36,y:at.y+i*36})});return}
   var txt=(cd.getData("text")||"").trim(); if(!txt)return; e.preventDefault();
+  if(sc&&sc.type==="frame"&&isUrl(txt)&&!/\s/.test(txt)){if(setFrameUrl(sc,txt))toast("Image added to the frame.");return}
   var urls=txt.split(/\s+/).filter(function(s){return parseLink(s)&&/^https?:|\//i.test(s)});
   if(urls.length){var made=urls.slice(0,12).map(function(u,i){return addLink(u,{x:at.x+i*40,y:at.y+i*40})}).filter(Boolean);
     if(made.length===1){var m=made[0];toast(PLAT[m.plat].name+" "+m.kind.toLowerCase()+" added. Shaped to "+(arLabel(m.ar)||"a post")+".")}else toast(made.length+" links added.");return}
@@ -1533,8 +1636,10 @@ vp.addEventListener("drop",function(e){
   if(files.length){
     if(on&&on.type==="link"&&/^image\//.test(files[0].type)){setThumb(on,files[0]);return}
     if(on&&on.type==="media"){replaceMedia(on,files[0]);return}
+    if(on&&on.type==="frame"){setFrameFile(on,files[0]);return}
     files.slice(0,12).forEach(function(f,i){addFile(f,{x:w.x+i*36,y:w.y+i*36})});return}
   var u=(dt.getData("text/uri-list")||dt.getData("text/plain")||"").split(/\s+/)[0];
+  if(on&&on.type==="frame"){var hm=/<img[^>]+src="([^"]+)"/i.exec(dt.getData("text/html")||"");if(hm&&isUrl(hm[1]))u=hm[1];if(u&&setFrameUrl(on,u))toast("Image added to the frame.");return}
   if(u&&!addLink(u,w))toast("Drop a link, a video or an image.");
 });
 
@@ -1554,6 +1659,91 @@ vp.addEventListener("drop",function(e){
   window.addEventListener("focus",check);
   document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
 })();
+
+/* ---------- images in storyboard frames: from this computer or from the web ---------- */
+function frameImg(c){
+  if(c.imgFile){var u=fileUrl(c.imgFile);if(u)return u;if(!MISSING[c.imgFile.key])loadFile(c.imgFile).then(function(){render()});return ""}
+  return c.imgUrl||"";
+}
+window.__frameBad=function(img){var el=img.closest(".card"),c=el&&card(el.dataset.id);if(c&&c.imgUrl&&!c.imgFile){c.imgBad=true;img.parentNode.classList.add("bad");img.remove()}};
+function setFrameFile(c,file){
+  if(!/^image\//.test(file.type)){toast("Pick an image file: PNG, JPG, GIF or WebP.");return}
+  c.imgFile=storeFile(file); delete c.imgUrl; delete c.imgBad; c.imgEdit=false; sel=c.id; render(); toast("Image added to the frame.");
+}
+function setFrameUrl(c,u){
+  u=String(u||"").trim(); if(!isUrl(u)){toast("That doesn't look like a link. It should start with https://");return false}
+  c.imgUrl=u; delete c.imgFile; delete c.imgBad; c.imgEdit=false; sel=c.id; render(); return true;
+}
+function askFrameUrl(c){
+  c.imgEdit=true; sel=c.id; render();
+  var f=world.querySelector('[data-id="'+c.id+'"] .f-imgurl'); if(f)f.focus();
+}
+
+/* ---------- open a card's file: a Quick Look style preview ---------- */
+function extOf(n){var m=/\.([a-z0-9]{1,8})$/i.exec(n||"");return m?m[1].toLowerCase():""}
+function kindOfFile(name,type){
+  var e=extOf(name), t=type||"";
+  if(/^video\//.test(t)||/^(mp4|mov|mkv|webm|avi|m4v)$/.test(e))return "Video";
+  if(/^audio\//.test(t)||/^(wav|mp3|aac|m4a|flac|ogg|aif|aiff)$/.test(e))return "Audio";
+  if(/^image\//.test(t)||/^(png|jpe?g|gif|webp|svg|psd|tiff?)$/.test(e))return "Image";
+  if(/^(ttf|otf|woff2?)$/.test(e))return "Font";
+  if(/^(aep|prproj|mogrt|ffx|drp|cube|lut)$/.test(e))return "Project file";
+  return e?e.toUpperCase()+" file":"File";
+}
+function isUrl(s){return /^https?:\/\//i.test(String(s||"").trim())}
+function canOpen(c){
+  if(c.type==="link")return !!c.url;
+  if(c.type==="frame")return !!(c.imgFile||c.imgUrl);
+  if(c.type==="media")return true;
+  return !!c.file||isUrl(c.loc);
+}
+function openLabel(c){return c.type==="frame"?"Open image":c.type==="link"?"Open link":c.type==="media"?"Open clip":c.file||!isUrl(c.loc)?(c.type==="asset"?"Open asset":"Open file"):"Open link"}
+function openExternal(u){var a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove()}
+function openCard(c){
+  if(c.type==="frame"){
+    if(c.imgFile){qlLoading(c);loadFile(c.imgFile).then(function(b){if(b)quickLook(c,b,c.imgFile.name,c.imgFile.type||b.type);else qlMissing(c)});return}
+    if(c.imgUrl){var nm=(c.imgUrl.split(/[?#]/)[0].split("/").pop()||"image");quickLook(c,null,nm,"image/web",c.imgUrl);return}
+  }
+  if(c.type==="link"){if(c.url)openExternal(c.start?linkAt(c,c.start)||c.url:c.url);return}
+  if(c.file){qlLoading(c);loadFile(c.file).then(function(b){if(b)quickLook(c,b,c.file.name,c.file.type||b.type);else qlMissing(c)});return}
+  if(c.type==="media"){var s=mediaSrc(c);if(s)quickLook(c,null,c.title||"Clip",c.mime,s);else qlMissing(c);return}
+  if(isUrl(c.loc)){openExternal(c.loc.trim());return}
+  qlMissing(c);
+}
+var qlUrl=null;
+function qlShow(name,meta,kind){
+  $("qlName").textContent=name; $("qlMeta").textContent=meta; $("qlIc").textContent=kind;
+  $("ql").classList.add("show"); $("qlClose").focus({preventScroll:true});
+}
+function qlLoading(c){$("qlBody").innerHTML='<div class="qlnone"><p>Opening…</p></div>';$("qlTab").hidden=$("qlDl").hidden=true;qlShow(c.title||"File","","")}
+function quickLook(c,blob,name,type,src){
+  var url=src||URL.createObjectURL(blob); qlUrl=src?null:url;
+  var e=extOf(name), k=kindOfFile(name,type), size=blob?(blob.size<1048576?Math.max(1,Math.round(blob.size/1024))+" KB":(blob.size/1048576).toFixed(1)+" MB"):"", body;
+  if(k==="Video")body='<video src="'+esc(url)+'" controls autoplay playsinline></video>';
+  else if(k==="Audio")body='<div class="qlaudio"><span class="qlwave"><i></i><i></i><i></i><i></i><i></i></span><audio src="'+esc(url)+'" controls autoplay></audio></div>';
+  else if(k==="Image"&&e!=="psd"&&e!=="tif"&&e!=="tiff")body='<img src="'+esc(url)+'" alt="">';
+  else if(e==="pdf"||type==="application/pdf")body='<iframe src="'+esc(url)+'" title="'+esc(name)+'"></iframe>';
+  else if(blob&&blob.size<2*1048576&&(/^text\//.test(type||"")||/^(txt|md|srt|vtt|json|csv|xml|cube)$/.test(e)))body='<pre id="qlText">Loading…</pre>';
+  else body='<div class="qlnone"><span class="qlext">.'+esc(e||"file")+'</span><p>Case Board can\'t show this kind of file. Download it to open it in its own app.</p></div>';
+  $("qlBody").innerHTML=body;
+  if(body.indexOf('id="qlText"')>0)blob.text().then(function(t){var p=$("qlText");if(p)p.textContent=t});
+  $("qlTab").href=url; $("qlDl").href=url; $("qlDl").setAttribute("download",name); $("qlTab").hidden=$("qlDl").hidden=false;
+  qlShow(name,[k,size,c.file?"Kept in this browser":""].filter(Boolean).join(" \u00b7 "),(e||"").slice(0,4).toUpperCase()||"FILE");
+}
+function qlMissing(c){
+  $("qlBody").innerHTML='<div class="qlnone"><span class="qlext">?</span><p>'+(c.file?"This file isn't stored in this browser. It was attached on another device, or the browser cleared its storage.":"Nothing is attached to this card yet.")+'</p><button type="button" class="wbtn pri" id="qlFind">'+(c.file?"Find the file…":"Attach a file…")+'</button></div>';
+  $("qlTab").hidden=$("qlDl").hidden=true;
+  $("qlFind").addEventListener("click",function(){qlClose();sel=c.id;$("filePick").click()});
+  qlShow(c.title||"File",c.file?c.file.name:"","?");
+}
+function qlClose(){if(!$("ql").classList.contains("show"))return;$("ql").classList.remove("show");setTimeout(function(){if(!$("ql").classList.contains("show")){$("qlBody").innerHTML="";if(qlUrl){URL.revokeObjectURL(qlUrl);qlUrl=null}}},250)}
+$("qlClose").addEventListener("click",qlClose);
+$("ql").addEventListener("pointerdown",function(e){if(e.target.id==="ql")qlClose()});
+vp.addEventListener("dblclick",function(e){
+  /* the board captures the pointer for dragging, so the event lands on the board: look up what's under the cursor */
+  var t=document.elementFromPoint(e.clientX,e.clientY); if(!t||ro()||t.closest(".f,button,a,input,.vwrap,.lframe"))return;
+  var el=t.closest(".card"), c=el&&card(el.dataset.id); if(c&&c.type!=="folder"&&canOpen(c)){e.preventDefault();openCard(c)}
+});
 
 /* ---------- projects ---------- */
 function ago(t){var s=(Date.now()-(t||0))/1000;if(s<60)return "just now";var m=s/60;if(m<60)return Math.floor(m)+" min ago";var h=m/60;if(h<24)return Math.floor(h)+" h ago";var d=h/24;if(d<7)return Math.floor(d)+(Math.floor(d)===1?" day ago":" days ago");return new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}
@@ -1765,7 +1955,7 @@ $("roBtn").addEventListener("click",function(){
 });
 window.addEventListener("resize",function(){measureF();applyView()});
 
-measureF(); load(); R.projects.forEach(function(pr){pr.pages.forEach(function(pg){pg.cards.forEach(function(c){if(c.playing)c.playing=false})})}); hist.cur=JSON.stringify(R); render(); fit(); drawDock();
+measureF(); load(); setTimeout(cleanFiles,4000); R.projects.forEach(function(pr){pr.pages.forEach(function(pg){pg.cards.forEach(function(c){if(c.playing)c.playing=false})})}); hist.cur=JSON.stringify(R); render(); fit(); drawDock();
 setTimeout(function(){$("hint").style.display="none"},7000);
 })();
 </script>
